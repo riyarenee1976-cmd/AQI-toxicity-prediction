@@ -1,0 +1,25 @@
+{
+  "best_model": "Decision Tree",
+  "classes": [
+    "Moderate",
+    "Safe",
+    "Toxic / Unhealthy"
+  ],
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "pollutants": [
+    "CO",
+    "NH3",
+    "NO2",
+    "OZONE",
+    "PM10",
+    "PM2.5",
+    "SO2"
+  ],
+  "seasons": [
+    "Autumn",
+    "Spring",
+    "Summer",
+    "Winter"
+  ]
+}
