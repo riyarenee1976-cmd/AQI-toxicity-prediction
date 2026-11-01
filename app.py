@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import joblib, json
+import json
+import joblib
 
 st.set_page_config(page_title="Air Quality Surveillance", page_icon="🌫️", layout="wide")
 
