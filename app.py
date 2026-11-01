@@ -1,154 +1,31 @@
-
 import streamlit as st
 import pandas as pd
 import json
 import joblib
 
-# ---------------- PAGE CONFIG ----------------
+# =========================================================
+# PAGE CONFIGURATION
+# =========================================================
+
 st.set_page_config(
-    page_title="AirGuard | Air Quality Intelligence",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    page_title="AirGuard | Air Quality Surveillance",
+    page_icon="🌸",
+    layout="wide"
 )
 
-# ---------------- CUSTOM DESIGN ----------------
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-.stApp {
-    background: linear-gradient(135deg, #071b16, #0c2921);
-    color: #ecfdf5;
-    font-family: 'Inter', sans-serif;
-}
-
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    max-width: 1250px;
-}
-
-h1, h2, h3 {
-    color: #ecfdf5 !important;
-    font-weight: 700 !important;
-}
-
-p, label, .stMarkdown {
-    color: #cbd5d1;
-}
-
-[data-testid="stMetric"] {
-    background: #12382c;
-    border: 1px solid #285542;
-    padding: 20px;
-    border-radius: 14px;
-}
-
-[data-testid="stMetricValue"] {
-    color: #6ee7a5;
-}
-
-[data-testid="stMetricLabel"] {
-    color: #b6d9c5;
-}
-
-.stTabs [data-baseweb="tab-list"] {
-    gap: 12px;
-    border-bottom: 1px solid #285542;
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: #12382c;
-    color: #d1fae5;
-    border-radius: 10px 10px 0 0;
-    padding: 12px 22px;
-}
-
-.stTabs [aria-selected="true"] {
-    background: #176b48 !important;
-    color: white !important;
-}
-
-.stButton > button {
-    background: linear-gradient(90deg, #16a36a, #25c47a);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 25px;
-    font-weight: 700;
-    width: 100%;
-    transition: 0.2s;
-}
-
-.stButton > button:hover {
-    background: #128653;
-    color: white;
-    border: none;
-}
-
-.stSelectbox, .stNumberInput, .stSlider {
-    background: transparent;
-}
-
-div[data-baseweb="select"] > div {
-    background: #12382c;
-    border-color: #285542;
-}
-
-input {
-    background-color: #12382c !important;
-}
-
-div[data-testid="stAlert"] {
-    border-radius: 12px;
-}
-
-.ag-header {
-    background: linear-gradient(110deg, #123d2d, #176b48);
-    border: 1px solid #347c57;
-    padding: 28px;
-    border-radius: 18px;
-    margin-bottom: 25px;
-}
-
-.ag-card {
-    background: #12382c;
-    border: 1px solid #285542;
-    border-radius: 15px;
-    padding: 22px;
-    margin-bottom: 15px;
-}
-
-.ag-result {
-    border-radius: 16px;
-    padding: 30px;
-    text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-.ag-footer {
-    text-align: center;
-    color: #86a99a;
-    padding: 25px;
-    border-top: 1px solid #285542;
-    margin-top: 35px;
-    font-size: 13px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# ---------------- LOAD MODEL AND DATA ----------------
+# =========================================================
+# LOAD MODEL AND DATA
+# =========================================================
 
 @st.cache_resource
 def load_model():
-    with open("model_meta.json", "r") as f:
-        metadata = json.load(f)
+    model = joblib.load("aqi_model.pkl")
 
-    return joblib.load("aqi_model.pkl"), metadata
+    with open("model_meta.json", "r") as file:
+        meta = json.load(file)
+
+    return model, meta
 
 
 @st.cache_data
@@ -160,397 +37,779 @@ model, meta = load_model()
 data = load_data()
 
 
-# ---------------- CLASSIFICATION STYLE ----------------
+# =========================================================
+# COLOUR THEME
+# =========================================================
 
 STYLE = {
     "Safe": (
-        "#16a36a",
+        "#249B72",
         "🟢",
         "Air quality is satisfactory. Normal outdoor activity is fine."
     ),
+
     "Moderate": (
-        "#e5a329",
-        "🟡",
-        "Air quality is moderate. Sensitive individuals should limit prolonged outdoor activity."
+        "#F28C55",
+        "🟠",
+        "Air is moderately polluted. Sensitive individuals should limit prolonged outdoor activity."
     ),
+
     "Toxic / Unhealthy": (
-        "#e05252",
+        "#D94867",
         "🔴",
         "Air quality is unhealthy. Reduce outdoor exposure and follow local health guidance."
     )
 }
 
 
-# ---------------- HEADER ----------------
+# =========================================================
+# CUSTOM CSS – PINK AND ORANGE THEME
+# =========================================================
+
+st.markdown("""
+<style>
+
+/* Main background */
+
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #fff5f0 0%,
+        #ffe8e8 50%,
+        #fff0df 100%
+    );
+    color: #492b35;
+}
+
+/* Main content */
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Headings */
+
+h1, h2, h3 {
+    color: #542c3d !important;
+    font-weight: 700 !important;
+}
+
+/* Paragraphs */
+
+p, label, .stMarkdown {
+    color: #654451;
+}
+
+/* Header */
+
+.ag-header {
+    background: linear-gradient(
+        110deg,
+        #e85d75,
+        #f28c55
+    );
+    padding: 35px;
+    border-radius: 22px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 22px rgba(210, 90, 110, 0.15);
+}
+
+.ag-header h1 {
+    color: white !important;
+    font-size: 38px;
+    margin-bottom: 5px;
+}
+
+.ag-header p {
+    color: #fff7f2 !important;
+    font-size: 16px;
+}
+
+/* Cards */
+
+.ag-card {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #f6c8c5;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 5px 18px rgba(190, 100, 110, 0.08);
+    margin-bottom: 15px;
+}
+
+/* Prediction result */
+
+.ag-result {
+    background: #fff0e8;
+    border: 2px solid #f6b7a9;
+    border-radius: 18px;
+    padding: 25px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Metric cards */
+
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border: 1px solid #f6c8c5;
+    padding: 18px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(190, 100, 110, 0.06);
+}
+
+[data-testid="stMetricValue"] {
+    color: #d94e70;
+    font-weight: 700;
+}
+
+/* Buttons */
+
+.stButton > button {
+    background: linear-gradient(
+        100deg,
+        #e85d75,
+        #f28c55
+    );
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(
+        100deg,
+        #d94e70,
+        #e87845
+    );
+    color: white;
+    border: none;
+    transform: translateY(-2px);
+}
+
+/* Tabs */
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 12px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: #fff0e8;
+    border-radius: 10px;
+    color: #754454;
+    padding: 10px 20px;
+}
+
+.stTabs [aria-selected="true"] {
+    background: #e85d75 !important;
+    color: white !important;
+}
+
+/* Input boxes */
+
+.stTextInput input,
+.stNumberInput input,
+.stSelectbox div[data-baseweb="select"] {
+    background-color: #fffaf7;
+    border-radius: 10px;
+}
+
+/* Footer */
+
+.ag-footer {
+    text-align: center;
+    color: #9b7180;
+    padding: 25px;
+    font-size: 13px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# =========================================================
+# HEADER
+# =========================================================
 
 st.markdown("""
 <div class="ag-header">
-    <h1>🌿 AIRGUARD</h1>
-    <h3>Intelligent Air Quality Monitoring System</h3>
+
+    <h1>🌸 AirGuard</h1>
+
     <p>
-        Machine learning powered air quality classification
-        and environmental analytics.
+        Intelligent Air Quality Surveillance and
+        Toxicity Prediction System
     </p>
+
+    <p>
+        Monitor air pollution. Predict air quality.
+        Make healthier decisions.
+    </p>
+
 </div>
 """, unsafe_allow_html=True)
 
 
-# MODEL INFORMATION
+# =========================================================
+# HELPER FUNCTIONS
+# =========================================================
 
-st.markdown("### 🤖 Machine Learning Model")
+def get_pollutant_options():
+    pollutants = meta.get("pollutants", [])
 
-m1, m2, m3 = st.columns(3)
+    if isinstance(pollutants, dict):
+        return list(pollutants.keys())
 
-m1.metric("Algorithm", meta["best_model"])
-m2.metric("Test Accuracy", f'{meta["accuracy"] * 100:.2f}%')
-m3.metric("Macro F1 Score", f'{meta["macro_f1"]:.3f}')
+    if isinstance(pollutants, list) and pollutants:
+        if isinstance(pollutants[0], dict):
+            return [
+                item.get("name", str(item))
+                for item in pollutants
+            ]
 
-st.write("")
+        return pollutants
+
+    return ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
 
 
-# ---------------- NAVIGATION ----------------
+def get_pollutant_id(pollutant):
+    pollutants = meta.get("pollutants", [])
+
+    if isinstance(pollutants, dict):
+        value = pollutants.get(pollutant)
+
+        if isinstance(value, dict):
+            return value.get("id", 0)
+
+        if value is not None:
+            return value
+
+    if isinstance(pollutants, list):
+        for index, item in enumerate(pollutants):
+            if isinstance(item, dict):
+                if item.get("name") == pollutant:
+                    return item.get("id", index)
+
+            elif item == pollutant:
+                return index
+
+    return 0
+
+
+def show_result(result, confidence=None):
+    result = str(result)
+
+    colour, emoji, message = STYLE.get(
+        result,
+        ("#D94867", "⚪", "Prediction completed.")
+    )
+
+    st.markdown(f"""
+    <div class="ag-result">
+
+        <h2 style="color:{colour};">
+            {emoji} {result}
+        </h2>
+
+        <p style="font-size:16px;">
+            {message}
+        </p>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    if confidence is not None:
+        st.write("### Prediction confidence")
+
+        st.progress(float(confidence))
+
+        st.write(f"**Confidence: {confidence * 100:.2f}%**")
+
+
+# =========================================================
+# NAVIGATION TABS
+# =========================================================
 
 tab1, tab2, tab3 = st.tabs([
-    "🔍  AIR QUALITY PREDICTION",
-    "📊  ANALYTICS DASHBOARD",
-    "🌱  ABOUT AIRGUARD"
+    "🔍 Predict Air Quality",
+    "📊 Analytics Dashboard",
+    "🌸 About AirGuard"
 ])
 
 
-# ==================================================
-# TAB 1: PREDICTION
-# ==================================================
+# =========================================================
+# TAB 1 – AIR QUALITY PREDICTION
+# =========================================================
 
 with tab1:
 
     st.markdown("## 🔍 Air Quality Prediction")
+
     st.write(
-        "Enter pollutant measurements and weather conditions "
-        "to estimate the air quality category."
+        "Enter the pollutant and environmental measurements "
+        "to predict the air quality category."
     )
 
-    st.markdown("### 🧪 Pollutant Measurements")
+    st.markdown('<div class="ag-card">', unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
-    with c1:
+    pollutant_options = get_pollutant_options()
+
+    with col1:
+
+        st.subheader("Pollutant Information")
+
         pollutant = st.selectbox(
             "Select Pollutant",
-            meta["pollutants"]
+            pollutant_options
         )
 
-        p_min = st.number_input(
-            "Minimum Concentration",
+        pollutant_min = st.number_input(
+            "Minimum Pollutant Value",
             min_value=0.0,
-            max_value=300.0,
-            value=30.0
+            value=10.0,
+            step=0.1
         )
 
-    with c2:
-        p_avg = st.number_input(
-            "Average Concentration",
+        pollutant_max = st.number_input(
+            "Maximum Pollutant Value",
             min_value=0.0,
-            max_value=300.0,
-            value=70.0
+            value=50.0,
+            step=0.1
         )
 
-        p_max = st.number_input(
-            "Maximum Concentration",
+        pollutant_avg = st.number_input(
+            "Average Pollutant Value",
             min_value=0.0,
-            max_value=500.0,
-            value=120.0
+            value=25.0,
+            step=0.1
         )
 
-    with c3:
-        season = st.selectbox(
-            "Season",
-            meta["seasons"]
+    with col2:
+
+        st.subheader("Environmental Information")
+
+        temperature = st.number_input(
+            "Temperature (°C)",
+            value=28.0,
+            step=0.1
+        )
+
+        humidity = st.number_input(
+            "Humidity (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=60.0,
+            step=0.1
+        )
+
+        wind_speed = st.number_input(
+            "Wind Speed (km/h)",
+            min_value=0.0,
+            value=10.0,
+            step=0.1
         )
 
         hour = st.slider(
-            "Hour of Day",
-            0, 23, 12
+            "Hour of the Day",
+            min_value=0,
+            max_value=23,
+            value=12
         )
 
-    st.markdown("### 🌤️ Weather Conditions")
-
-    w1, w2, w3 = st.columns(3)
-
-    with w1:
-        temp = st.slider(
-            "Temperature (°C)",
-            15.0, 40.0, 28.0
+        season = st.selectbox(
+            "Season",
+            ["Winter", "Summer", "Monsoon", "Post-Monsoon"]
         )
 
-    with w2:
-        hum = st.slider(
-            "Humidity (%)",
-            30.0, 95.0, 60.0
-        )
-
-    with w3:
-        wind = st.slider(
-            "Wind Speed (km/h)",
-            0.0, 30.0, 15.0
-        )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.write("")
 
-    if st.button("🌿 ANALYSE AIR QUALITY"):
+    if st.button("🌸 Predict Air Quality", use_container_width=True):
 
-        if not (p_min <= p_avg <= p_max):
+        if pollutant_min > pollutant_max:
             st.error(
-                "Please ensure Minimum ≤ Average ≤ Maximum concentration."
+                "Minimum pollutant value cannot be greater "
+                "than maximum pollutant value."
+            )
+
+        elif not pollutant_min <= pollutant_avg <= pollutant_max:
+            st.error(
+                "Average pollutant value should be between "
+                "the minimum and maximum values."
             )
 
         else:
 
-            row = pd.DataFrame([{
-                "pollutant_min": p_min,
-                "pollutant_max": p_max,
-                "pollutant_avg": p_avg,
-                "Temperature_C": temp,
-                "Humidity_%": hum,
-                "Wind_Speed_kmh": wind,
+            # Input features must match the training features.
+
+            input_data = pd.DataFrame([{
+                "pollutant_min": pollutant_min,
+                "pollutant_max": pollutant_max,
+                "pollutant_avg": pollutant_avg,
+                "Temperature_C": temperature,
+                "Humidity_%": humidity,
+                "Wind_Speed_kmh": wind_speed,
                 "Hour": hour,
-                "pollutant_id": pollutant,
+                "pollutant_id": get_pollutant_id(pollutant),
                 "Season": season
             }])
 
-            pred = model.predict(row)[0]
-            proba = model.predict_proba(row)[0]
+            try:
 
-            color, icon, advice = STYLE[pred]
+                prediction = model.predict(input_data)[0]
 
-            st.markdown(
-                f"""
-                <div class="ag-result"
-                     style="background:{color}20;
-                            border:1px solid {color};">
-                    <h2 style="color:{color}!important;">
-                        {icon} AIR QUALITY RESULT
-                    </h2>
-                    <h1 style="color:{color}!important;
-                               font-size:38px;">
-                        {pred}
-                    </h1>
-                    <p style="color:#ecfdf5;">
-                        Your predicted air quality category
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                confidence = None
 
-            st.markdown("### 💡 Health Recommendation")
+                if hasattr(model, "predict_proba"):
+                    probabilities = model.predict_proba(input_data)[0]
+                    confidence = max(probabilities)
 
-            st.info(advice)
+                st.markdown("### Prediction Result")
 
-            st.markdown("### 📈 Prediction Confidence")
+                show_result(prediction, confidence)
 
-            confidence = pd.DataFrame({
-                "Confidence (%)": proba * 100
-            }, index=model.classes_)
+            except Exception as error:
 
-            st.bar_chart(confidence)
+                st.error(
+                    "Prediction could not be completed. "
+                    "Please check that the input features "
+                    "match the model's training features."
+                )
 
-            st.caption(
-                "Prediction confidence represents the model's "
-                "estimated class probabilities, not a guaranteed outcome."
-            )
+                st.exception(error)
 
 
-# ==================================================
-# TAB 2: ANALYTICS DASHBOARD
-# ==================================================
+# =========================================================
+# TAB 2 – ANALYTICS DASHBOARD
+# =========================================================
 
 with tab2:
 
-    st.markdown("## 📊 Air Quality Analytics")
+    st.markdown("## 📊 Air Quality Analytics Dashboard")
 
     st.write(
-        "Explore air quality patterns and pollutant distributions "
-        "in the available dataset."
+        "Explore air quality records, pollution levels "
+        "and geographical distribution."
     )
 
-    # DATASET METRICS
+    # Check available columns
 
-    m1, m2, m3, m4 = st.columns(4)
+    required_columns = [
+        "AQI",
+        "Air_Quality_Class",
+        "city"
+    ]
 
-    m1.metric(
-        "Total Records",
-        f"{len(data):,}"
-    )
+    missing_columns = [
+        column for column in required_columns
+        if column not in data.columns
+    ]
 
-    m2.metric(
-        "Cities Covered",
-        f"{data['city'].nunique():,}"
-    )
+    if missing_columns:
 
-    m3.metric(
-        "Average AQI",
-        f"{data['AQI'].mean():.1f}"
-    )
-
-    toxic_percentage = (
-        data["Air_Quality_Class"] == "Toxic / Unhealthy"
-    ).mean() * 100
-
-    m4.metric(
-        "Toxic Readings",
-        f"{toxic_percentage:.1f}%"
-    )
-
-    st.write("")
-
-    # CHARTS
-
-    left, right = st.columns(2)
-
-    with left:
-
-        st.markdown("### 📌 Air Quality Distribution")
-
-        class_counts = (
-            data["Air_Quality_Class"]
-            .value_counts()
+        st.warning(
+            "The dashboard is missing these columns: "
+            + ", ".join(missing_columns)
         )
 
-        st.bar_chart(class_counts)
-
-    with right:
-
-        st.markdown("### 🧪 Pollutant Analysis")
-
-        pollutant_avg = (
-            data.groupby("pollutant_id")["pollutant_avg"]
-            .mean()
-            .sort_values(ascending=False)
-        )
-
-        st.bar_chart(pollutant_avg)
-
-    st.divider()
-
-    # STATE FILTER
-
-    st.markdown("### 🗺️ Explore by State")
-
-    city = st.selectbox(
-        "Choose a State",
-        ["All"] + sorted(data["state"].dropna().unique())
-    )
-
-    view = (
-        data if city == "All"
-        else data[data["state"] == city]
-    )
-
-    st.markdown("### 🏙️ Most Polluted Cities")
-
-    top_cities = (
-        view.groupby("city")["AQI"]
-        .mean()
-        .sort_values(ascending=False)
-        .head(10)
-    )
-
-    st.bar_chart(top_cities)
-
-    st.markdown("### 📍 Air Quality Monitoring Locations")
-
-    map_data = (
-        view[["latitude", "longitude"]]
-        .dropna()
-        .rename(columns={
-            "latitude": "lat",
-            "longitude": "lon"
-        })
-    )
-
-    if not map_data.empty:
-        st.map(map_data)
     else:
-        st.warning("No valid location coordinates available.")
+
+        # ---------------------------------------------
+        # KEY METRICS
+        # ---------------------------------------------
+
+        total_records = len(data)
+
+        average_aqi = data["AQI"].mean()
+
+        highest_aqi = data["AQI"].max()
+
+        toxic_records = data[
+            data["Air_Quality_Class"].astype(str).str.contains(
+                "toxic|unhealthy",
+                case=False,
+                na=False
+            )
+        ]
+
+        toxic_percentage = (
+            len(toxic_records) / total_records * 100
+            if total_records > 0 else 0
+        )
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric(
+            "Total Records",
+            f"{total_records:,}"
+        )
+
+        col2.metric(
+            "Average AQI",
+            f"{average_aqi:.2f}"
+        )
+
+        col3.metric(
+            "Highest AQI",
+            f"{highest_aqi:.2f}"
+        )
+
+        col4.metric(
+            "Toxic / Unhealthy",
+            f"{toxic_percentage:.1f}%"
+        )
+
+        st.divider()
+
+        # ---------------------------------------------
+        # AIR QUALITY DISTRIBUTION
+        # ---------------------------------------------
+
+        st.subheader("🌸 Air Quality Class Distribution")
+
+        class_counts = data["Air_Quality_Class"].value_counts()
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.bar_chart(class_counts)
+
+        with col2:
+
+            st.write("### Class-wise Records")
+
+            st.dataframe(
+                class_counts.rename("Number of Records"),
+                use_container_width=True
+            )
+
+        st.divider()
+
+        # ---------------------------------------------
+        # AQI ANALYSIS
+        # ---------------------------------------------
+
+        st.subheader("📈 AQI Analysis")
+
+        if "state" in data.columns:
+
+            states = sorted(
+                data["state"].dropna().unique().tolist()
+            )
+
+            selected_states = st.multiselect(
+                "Filter by State",
+                states,
+                default=states
+            )
+
+            filtered_data = data[
+                data["state"].isin(selected_states)
+            ]
+
+        else:
+
+            filtered_data = data.copy()
+
+        if not filtered_data.empty:
+
+            city_aqi = (
+                filtered_data.groupby("city")["AQI"]
+                .mean()
+                .sort_values(ascending=False)
+                .head(10)
+            )
+
+            st.write("### Top 10 Cities with Highest Average AQI")
+
+            st.bar_chart(city_aqi)
+
+            st.write("### AQI Dataset")
+
+            st.dataframe(
+                filtered_data,
+                use_container_width=True,
+                height=350
+            )
+
+        else:
+
+            st.info("No records available for the selected filter.")
+
+        st.divider()
+
+        # ---------------------------------------------
+        # POLLUTANT ANALYSIS
+        # ---------------------------------------------
+
+        if "pollutant_id" in data.columns and "pollutant_avg" in data.columns:
+
+            st.subheader("🌫️ Pollutant Analysis")
+
+            pollutant_analysis = (
+                data.groupby("pollutant_id")["pollutant_avg"]
+                .mean()
+                .sort_values(ascending=False)
+            )
+
+            st.bar_chart(pollutant_analysis)
+
+        st.divider()
+
+        # ---------------------------------------------
+        # GEOGRAPHICAL DISTRIBUTION
+        # ---------------------------------------------
+
+        st.subheader("📍 Air Quality Monitoring Locations")
+
+        if "latitude" in data.columns and "longitude" in data.columns:
+
+            map_data = filtered_data[
+                ["latitude", "longitude"]
+            ].copy()
+
+            map_data = map_data.dropna()
+
+            map_data = map_data.rename(columns={
+                "latitude": "lat",
+                "longitude": "lon"
+            })
+
+            if not map_data.empty:
+
+                st.map(map_data)
+
+            else:
+
+                st.info("No valid geographical coordinates available.")
+
+        else:
+
+            st.info(
+                "Latitude and longitude columns are not available "
+                "in the dataset."
+            )
 
 
-# ==================================================
-# TAB 3: ABOUT
-# ==================================================
+# =========================================================
+# TAB 3 – ABOUT AIRGUARD
+# =========================================================
 
 with tab3:
 
-    st.markdown("## 🌱 About AirGuard")
+    st.markdown("## 🌸 About AirGuard")
 
     st.markdown("""
     <div class="ag-card">
-        <h3>What is AirGuard?</h3>
+
+        <h2 style="color:#d94e70;">
+            🌍 Intelligent Air Quality Monitoring
+        </h2>
+
         <p>
-        AirGuard is a machine learning based air quality
-        classification application designed to analyse
-        pollutant concentrations and estimate air quality levels.
+            AirGuard is a machine learning-based air quality
+            surveillance and toxicity prediction system.
         </p>
+
         <p>
-        The system uses environmental measurements and
-        weather-related parameters to classify air quality
-        into three categories: Safe, Moderate and Toxic / Unhealthy.
+            The application analyses pollutant concentrations
+            and environmental parameters to predict air quality
+            categories and help users understand pollution levels.
         </p>
+
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### ⚙️ Technologies Used")
-
-    t1, t2, t3 = st.columns(3)
-
-    t1.markdown(
-        '<div class="ag-card"><h3>🐍 Python</h3>'
-        '<p>Programming language</p></div>',
-        unsafe_allow_html=True
-    )
-
-    t2.markdown(
-        '<div class="ag-card"><h3>🌳 Random Forest</h3>'
-        '<p>Machine learning algorithm</p></div>',
-        unsafe_allow_html=True
-    )
-
-    t3.markdown(
-        '<div class="ag-card"><h3>📊 Streamlit</h3>'
-        '<p>Interactive web application</p></div>',
-        unsafe_allow_html=True
-    )
 
     st.markdown("### 🎯 Project Objectives")
 
     st.markdown("""
-    - Analyse air quality using pollutant measurements.
-    - Classify air quality into three categories.
-    - Provide an interactive prediction interface.
-    - Visualise environmental data through charts and maps.
-    - Demonstrate machine learning applications in environmental monitoring.
+    - Predict air quality using machine learning.
+    - Classify air conditions into Safe, Moderate and Toxic / Unhealthy.
+    - Analyse pollutant concentrations.
+    - Visualise air quality data through an interactive dashboard.
+    - Support awareness of environmental pollution.
     """)
 
-    st.markdown("### 👩‍💻 Project Information")
+    st.markdown("### 🤖 Machine Learning Model")
 
     st.markdown("""
-    **Project:** AirGuard – Air Quality Classification using Machine Learning
+    <div class="ag-card">
 
-    **Model:** Random Forest Classification
+        <h3 style="color:#e85d75;">
+            Random Forest Classifier
+        </h3>
 
-    **Platform:** Python and Streamlit
+        <p>
+            AirGuard uses a Random Forest classification model
+            to predict air quality categories from pollutant
+            and environmental measurements.
+        </p>
 
-    **Application:** Environmental monitoring and air quality awareness
-    """)
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### 🛠️ Technologies Used")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("""
+        **Programming**
+
+        - Python
+        - Pandas
+        - NumPy
+        """)
+
+    with col2:
+        st.markdown("""
+        **Machine Learning**
+
+        - Scikit-learn
+        - Random Forest
+        - Joblib
+        """)
+
+    with col3:
+        st.markdown("""
+        **Application**
+
+        - Streamlit
+        - Data Visualisation
+        - GitHub
+        """)
+
+    st.markdown("### 🌱 Our Goal")
+
+    st.write(
+        "To make air quality information easier to understand "
+        "through machine learning, data analysis and interactive "
+        "visualisation."
+    )
 
 
-# ---------------- FOOTER ----------------
+# =========================================================
+# FOOTER
+# =========================================================
 
 st.markdown("""
 <div class="ag-footer">
-    🌿 AIRGUARD | Intelligent Air Quality Monitoring System
-    <br><br>
-    Built using Python, Machine Learning and Streamlit
-    <br>
-    © 2026 AirGuard Project
+
+    <p>
+        🌸 AirGuard | Intelligent Air Quality Surveillance
+    </p>
+
+    <p>
+        Machine Learning Mini Project
+    </p>
+
 </div>
 """, unsafe_allow_html=True)
